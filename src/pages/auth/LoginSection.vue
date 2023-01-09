@@ -38,22 +38,22 @@
 
 <script setup>
 import { ref } from 'vue'
-import { api } from 'src/boot/axios'
+import { useUserStore } from 'src/stores/user-store'
 
 const email = ref(null)
 const password = ref(null)
+const userStore = useUserStore()
 
 const login = async () => {
-  await api.get('/sanctum/csrf-cookie')
-
-  await api.post('login', {
-    email: email.value,
-    password: password.value
-  })
-
-  const result = await api.get('/api/user')
-
-  console.log(result)
+  // Get the tokens/cookie
+  await userStore.getSanctumCookie()
+  // Login user
+  await userStore.login(email.value, password.value)
+  // Get the user
+  const user = await userStore.fetchUser()
+  console.log(user)
+  // Set user data in localstorage (PINIA)
+  userStore.setUser(user.data)
 }
 
 </script>
